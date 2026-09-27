@@ -2,7 +2,7 @@
 
 ## 1. Objective
 
-This report compares supervised and unsupervised machine learning approaches for detecting fraudulent credit card transactions, using **Area Under the Precision-Recall Curve (AUPRC)** as the primary evaluation metric. AUPRC was chosen over ROC-AUC because it is far more informative under the severe class imbalance present in this dataset (~0.17% fraud rate), where ROC-AUC can appear misleadingly high even for weak models.
+This report compares supervised machine learning approaches for detecting fraudulent credit card transactions, using **Area Under the Precision-Recall Curve (AUPRC)** as the primary evaluation metric. AUPRC was chosen over ROC-AUC because it is far more informative under the severe class imbalance present in this dataset (~0.17% fraud rate), where ROC-AUC can appear misleadingly high even for weak models.
 
 ## 2. Dataset & Methodology
 
@@ -58,7 +58,7 @@ Evaluated once, on the previously untouched test set:
 | Baseline (random) AUPRC | 0.0017 | 0.0017 |
 | Lift over baseline | ~520× | ~499× |
 
-**Interpreting the validation-to-test gap:** A drop of 0.057 might initially suggest overfitting to the validation set, but the more likely explanation is statistical: AUPRC computed from only **47** positive cases (validation) carries substantially more sampling variance than AUPRC computed from **236** positive cases (test) — the same phenomenon observed in the Isolation Forest seed-variance analysis. Both splits have an essentially identical underlying fraud rate (0.166%), ruling out a distribution shift between sets. Given the larger positive-class sample in the test set, **the test AUPRC (0.827) is treated as the more statistically reliable estimate of true model performance**, with the validation score likely representing a somewhat optimistic draw from a small sample.
+**Interpreting the validation-to-test gap:** A drop of 0.057 might initially suggest overfitting to the validation set, but the more likely explanation is statistical: AUPRC computed from only **47** positive cases (validation) carries substantially more sampling variance than AUPRC computed from **236** positive cases (test). Given the larger positive-class sample in the test set, **the test AUPRC (0.827) is treated as the more statistically reliable estimate of true model performance**, with the validation score likely representing a somewhat optimistic draw from a small sample.
 
 *(Recommended follow-up, not yet completed: bootstrap resampling of both sets to directly quantify each estimate's confidence interval and confirm this interpretation numerically.)*
 
@@ -66,9 +66,8 @@ Evaluated once, on the previously untouched test set:
 
 1. **XGBoost with balanced class weighting is the recommended model**, achieving the best validation performance and a strong, statistically well-supported test AUPRC of 0.827 — roughly 500× better than random guessing.
 2. **Class-weight balancing should be applied selectively, not by default.** It benefited every model tested except SVM, where it caused catastrophic performance loss due to the margin-based optimization becoming ill-conditioned under inflated per-class penalties.
-3. **Unsupervised anomaly detection (Isolation Forest) is not competitive** with supervised approaches on this dataset when labels are available, though it remains a valid fallback for scenarios where labeled fraud data doesn't exist.
-4. **AUPRC estimates from small validation sets should be interpreted cautiously.** With only dozens of positive cases, single-point AUPRC estimates can vary meaningfully; where possible, report results with confidence intervals (via bootstrapping) rather than as single numbers, especially when comparing closely-performing models.
-5. **Next steps for further work:** bootstrap confidence intervals on the final test AUPRC; threshold selection informed by the business cost trade-off between false positives (blocked legitimate transactions) and false negatives (missed fraud); and repeated-split cross-validation for the top 2–3 models to further stabilize model-selection decisions.
+3. **AUPRC estimates from small validation sets should be interpreted cautiously.** With only dozens of positive cases, single-point AUPRC estimates can vary meaningfully; where possible, report results with confidence intervals (via bootstrapping) rather than as single numbers, especially when comparing closely-performing models.
+4. **Next steps for further work:** bootstrap confidence intervals on the final test AUPRC; threshold selection informed by the business cost trade-off between false positives (blocked legitimate transactions) and false negatives (missed fraud); and repeated-split cross-validation for the top 2–3 models to further stabilize model-selection decisions.
 
 ---
 *Metric: Average Precision (AUPRC). Models trained and evaluated with GPU-accelerated cuML (SVC, Logistic Regression, Random Forest) and XGBoost with CUDA support. Dataset: Kaggle `mlg-ulb/creditcardfraud`.*

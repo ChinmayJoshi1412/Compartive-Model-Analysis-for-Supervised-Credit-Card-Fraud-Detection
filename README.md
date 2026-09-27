@@ -45,22 +45,7 @@ Balancing improved three of the four models, consistent with the standard expect
 
 This is a useful, generalizable takeaway: **class-weight balancing is not a universally safe default** — its effect depends heavily on how a given model's loss function is structured. Smooth, global-objective models (logistic regression, tree ensembles) tolerated and benefited from it; SVM's margin-based, boundary-sensitive optimization did not.
 
-## 4. Unsupervised Baseline: Isolation Forest
-
-To establish a reference point for how much value the fraud labels themselves provide, an unsupervised Isolation Forest was also evaluated — first trained on the full training set (including fraud), then trained only on legitimate transactions (a semi-supervised "novelty detection" framing).
-
-A single-seed comparison initially suggested the full-data variant outperformed the legit-only variant (0.1711 vs. 0.1510 AUPRC), but given the algorithm's inherent sampling randomness, this was tested rigorously across **21 random seeds**:
-
-| Training data | Mean AUPRC | Std. dev. |
-|---|---|---|
-| Full data (incl. fraud) | 0.1883 | 0.0436 |
-| Legitimate-only | 0.1616 | 0.0355 |
-
-A paired t-test confirmed the difference is statistically significant (**t = 2.88, p = 0.009**; Wilcoxon signed-rank **p = 0.024**; 95% CI on the mean difference: **[0.007, 0.046]**). This is a modest but real effect: with `max_samples='auto'` capping each tree at 256 rows per subsample, occasional inclusion of fraud examples in a tree's training subsample appears to give the full-data forest a small but consistent edge in isolating similar patterns at inference time.
-
-**Bottom line:** even the better-performing unsupervised configuration (AUPRC ≈ 0.19) falls far short of every supervised model (AUPRC 0.82–0.88). This confirms that for this dataset, labeled fraud examples carry substantial, hard-to-replace signal — unsupervised anomaly detection is a reasonable fallback when labels are unavailable, but is not a substitute for supervised learning when labels exist.
-
-## 5. Final Model Selection & Test-Set Evaluation
+## 4. Final Model Selection & Test-Set Evaluation
 
 **XGBoost (class-weight balanced)** was selected as the best-performing model based on validation AUPRC (0.8844), narrowly ahead of Random Forest (balanced) at 0.8818.
 

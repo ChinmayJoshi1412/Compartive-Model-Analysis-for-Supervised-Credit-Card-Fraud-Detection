@@ -1,0 +1,9 @@
+,Model,AUPRC,Lift over baseline
+0,XGBoost (balanced),0.8844,533.895344680851
+1,Random Forest (balanced),0.8818,532.3257744680851
+2,Random Forest (unweighted),0.859,518.5618510638299
+3,Logistic Regression (balanced),0.8485,512.2232021276596
+4,XGBoost (unweighted),0.8336,503.22835744680856
+5,SVC (unweighted),0.8165,492.90541489361703
+6,Logistic Regression (unweighted),0.8154,492.2413659574468
+7,SVC (balanced),0.4795,289.46496808510636
